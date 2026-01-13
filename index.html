@@ -58,15 +58,42 @@
 </table>
 
 <script>
-const etfs = [
-  { symbol: "NIFTYBEES", name: "Nippon India ETF Nifty 50", category: "Equity", nav: 245.30 },
-  { symbol: "GOLDBEES", name: "Nippon India ETF Gold", category: "Gold", nav: 62.10 },
-  { symbol: "SETFNIF50", name: "SBI ETF Nifty 50", category: "Equity", nav: 247.80 },
-  { symbol: "HDFCGOLD", name: "HDFC Gold ETF", category: "Gold", nav: 63.40 }
-];
-
 const tbody = document.querySelector("#etfTable tbody");
 const search = document.getElementById("search");
+
+let allETFs = [];
+
+// Fetch daily NAV data from AMFI (official source)
+fetch("https://api.allorigins.win/raw?url=https://www.amfiindia.com/spages/NAVAll.txt")
+  .then(res => res.text())
+  .then(text => {
+    const lines = text.split("\n");
+
+    lines.forEach(line => {
+      const parts = line.split(";");
+
+      // ETF rows usually contain ISIN + NAV
+      if (parts.length > 4 && parts[3] && parts[4]) {
+        const name = parts[3].trim();
+        const nav = parseFloat(parts[4]);
+
+        // Filter only ETFs
+        if (name.toLowerCase().includes("etf")) {
+          allETFs.push({
+            symbol: name.split("ETF")[0].trim(),
+            name: name,
+            category: "ETF",
+            nav: nav.toFixed(2)
+          });
+        }
+      }
+    });
+
+    render(allETFs);
+  })
+  .catch(() => {
+    tbody.innerHTML = "<tr><td colspan='4'>Failed to load ETF data</td></tr>";
+  });
 
 function render(data) {
   tbody.innerHTML = "";
@@ -84,13 +111,11 @@ function render(data) {
 
 search.addEventListener("input", () => {
   const q = search.value.toLowerCase();
-  render(etfs.filter(e =>
+  render(allETFs.filter(e =>
     e.name.toLowerCase().includes(q) ||
     e.symbol.toLowerCase().includes(q)
   ));
 });
-
-render(etfs);
 </script>
 
 </body>
