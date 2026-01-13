@@ -63,8 +63,11 @@ const search = document.getElementById("search");
 
 let allETFs = [];
 
-// Fetch daily NAV data from AMFI (official source)
-fetch("https://api.allorigins.win/raw?url=https://www.amfiindia.com/spages/NAVAll.txt")
+// Public mirror of AMFI NAV data (daily updated)
+const AMFI_URL =
+  "https://raw.githubusercontent.com/rahulranjan/india-mutual-fund-data/master/data/nav.txt";
+
+fetch(AMFI_URL)
   .then(res => res.text())
   .then(text => {
     const lines = text.split("\n");
@@ -72,16 +75,14 @@ fetch("https://api.allorigins.win/raw?url=https://www.amfiindia.com/spages/NAVAl
     lines.forEach(line => {
       const parts = line.split(";");
 
-      // ETF rows usually contain ISIN + NAV
-      if (parts.length > 4 && parts[3] && parts[4]) {
-        const name = parts[3].trim();
+      if (parts.length > 4) {
+        const schemeName = parts[3]?.trim();
         const nav = parseFloat(parts[4]);
 
-        // Filter only ETFs
-        if (name.toLowerCase().includes("etf")) {
+        if (schemeName && schemeName.toLowerCase().includes("etf") && !isNaN(nav)) {
           allETFs.push({
-            symbol: name.split("ETF")[0].trim(),
-            name: name,
+            symbol: schemeName.split("ETF")[0].trim(),
+            name: schemeName,
             category: "ETF",
             nav: nav.toFixed(2)
           });
@@ -91,8 +92,10 @@ fetch("https://api.allorigins.win/raw?url=https://www.amfiindia.com/spages/NAVAl
 
     render(allETFs);
   })
-  .catch(() => {
-    tbody.innerHTML = "<tr><td colspan='4'>Failed to load ETF data</td></tr>";
+  .catch(err => {
+    console.error(err);
+    tbody.innerHTML =
+      "<tr><td colspan='4'>Unable to load ETF data. Please refresh later.</td></tr>";
   });
 
 function render(data) {
