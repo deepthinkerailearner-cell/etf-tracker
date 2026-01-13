@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Indian ETF Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #020617;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #1e293b;
+      text-align: left;
+    }
+    th {
+      background: #020617;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Indian ETF Tracker</h1>
+<p>Daily updated ETF data (NSE + BSE)</p>
+
+<input type="text" id="search" placeholder="Search ETF by name or symbol" />
+
+<table id="etfTable">
+  <thead>
+    <tr>
+      <th>Symbol</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>NAV (₹)</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const etfs = [
+  { symbol: "NIFTYBEES", name: "Nippon India ETF Nifty 50", category: "Equity", nav: 245.30 },
+  { symbol: "GOLDBEES", name: "Nippon India ETF Gold", category: "Gold", nav: 62.10 },
+  { symbol: "SETFNIF50", name: "SBI ETF Nifty 50", category: "Equity", nav: 247.80 },
+  { symbol: "HDFCGOLD", name: "HDFC Gold ETF", category: "Gold", nav: 63.40 }
+];
+
+const tbody = document.querySelector("#etfTable tbody");
+const search = document.getElementById("search");
+
+function render(data) {
+  tbody.innerHTML = "";
+  data.forEach(e => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${e.symbol}</td>
+        <td>${e.name}</td>
+        <td>${e.category}</td>
+        <td>${e.nav}</td>
+      </tr>
+    `;
+  });
+}
+
+search.addEventListener("input", () => {
+  const q = search.value.toLowerCase();
+  render(etfs.filter(e =>
+    e.name.toLowerCase().includes(q) ||
+    e.symbol.toLowerCase().includes(q)
+  ));
+});
+
+render(etfs);
+</script>
+
+</body>
+</html>
